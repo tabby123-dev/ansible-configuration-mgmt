@@ -1,18 +1,20 @@
 ---
-- name: Check Cpu and Ram 
+- name: Check CPU and RAM
   hosts: all
   become: yes
 
   tasks:
-  - name: Copy monitoring script.
-    ansible.builtin.copy:
-      src: /tmp/scriptscpu.sh
-      dest: /tmp/cpu.sh
-      mode: '0755'
-  - name: run resource monitoring script
-    ansible.builtin.command:
-      cmd: /tmp/cpu.sh
-    register: cpu_report
-  - name: Display resource report
-    ansible.builtin.debug:
-      msg: "{{cpu_report.stdout}}"
+    - name: Copy monitoring script
+      ansible.builtin.copy:
+        src: /tmp/scriptscpu.sh
+        dest: /tmp/cpu.sh
+        mode: '0755'
+
+    - name: Run resource monitoring script
+      ansible.builtin.command:
+        cmd: /bin/bash /tmp/cpu.sh
+      register: cpu_report
+
+    - name: Display resource report
+      ansible.builtin.debug:
+        msg: "{{ cpu_report.stdout }}"

@@ -1,4 +1,3 @@
-```bash
 #!/bin/bash
 
 # ==========================================
@@ -37,4 +36,4 @@ echo "RAM Used       : ${MEM_USED} MB"
 echo "RAM Available  : ${MEM_AVAILABLE} MB"
 echo "Load Average   : ${LOAD_AVG}"
 echo "=========================================="
-```
+
