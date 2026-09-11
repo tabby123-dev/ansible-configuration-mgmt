@@ -318,13 +318,13 @@ Verify that Wireshark is was not installed and  installed on a managed server:
 wireshark --version
 ```
 ### Screenshot
-
+![Wireshark Installation](images/playbook.png)
 ![Wireshark Installation](images/wireshark1.png)
 ![Wireshark Installation](images/wireshark2.png)
 
 ------------------------------------------------------------------------
 
-# Playbook 2: Create Directory and File and change timnezone on the servers
+# Playbook 2: Create Directory and File
 
 ## Objective
 
@@ -367,7 +367,7 @@ ansible-playbook -i inventory/dev.ini  playbooks/createfile.yml
 ```
 
 ### Screenshot
-
+![Wireshark Installation](images/createdir.png)
 ![Directory and File](images/dir3.png)
 
 
@@ -407,8 +407,35 @@ ansible-playbook -i inventory/dev.ini  playbooks/createfile.yml
 ```
 ### Screenshot
 ![Timezone Configuration](images/time.png)
+![Timezone Configuration](images/script.png)
 
 ------------------------------------------------------------------------
+# Playbook 4: Monitor cpu mempry on remote hosts
+------------------------------------------------------------------------
+```yaml
+---
+- name: Check CPU and RAM
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Copy monitoring script
+      ansible.builtin.copy:
+        src: /tmp/cpu.sh
+        dest: /tmp/cpu.sh
+        mode: '0755'
+
+    - name: Run resource monitoring script
+      ansible.builtin.command:
+        cmd: /bin/bash /tmp/cpu.sh
+      register: cpu_report
+
+    - name: Display resource report
+      ansible.builtin.debug:
+        msg: "{{ cpu_report.stdout }}"
+
+```
+![Timezone Configuration](images/script.png)
 
 # Testing and Validation
 
@@ -572,7 +599,7 @@ The Jenkins job performs the following high-level operations:
 
 ### Successful Build
 ![Successful Jenkins Build](images/ansiblejobsuccess.png)
-
+![Successful Jenkins Build](images/saveartifacts.png)
 ------------------------------------------------------------------------
 
 # Jenkins Pipeline Design
