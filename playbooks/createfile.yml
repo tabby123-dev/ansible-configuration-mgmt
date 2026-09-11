@@ -1,0 +1,24 @@
+---
+- name: Create a new directory and file inside it
+  hosts: db
+  become: yes
+  tasks:
+    - name: Create a new directory
+      ansible.builtin.file:
+        path: /tmp/TEST
+        state: directory
+        mode: '0755'
+    - name: Create file 
+      ansible.builtin.file:
+        path: /tmp/TEST/sample.txt
+        state: touch
+        mode: '0644'
+    - name: Add configuration in the file
+      ansible.builtin.copy:
+        dest: /tmp/TEST/sample.txt
+        content: |
+          Application: MyApp
+          Environment: Dev
+          Managed by: Ansible
+        mode: '0644'
+      
