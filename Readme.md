@@ -90,58 +90,6 @@ The project was designed to achieve the following objectives:
 The architecture consists of a developer workstation, GitHub,
 Jenkins/Ansible control node, and multiple managed servers.
 
-``` text
-                           +----------------------+
-                           |     Developer PC     |
-                           |      VS Code         |
-                           +----------+-----------+
-                                      |
-                                      | git push
-                                      v
-                           +----------------------+
-                           |       GitHub         |
-                           |     Repository       |
-                           +----------+-----------+
-                                      |
-                                      | Webhook
-                                      v
-                           +----------------------+
-                           |       Jenkins        |
-                           |   Automation Job     |
-                           +----------+-----------+
-                                      |
-                                      | Execute
-                                      v
-                           +----------------------+
-                           | Ansible Control Node  |
-                           | Jenkins + Ansible    |
-                           +----------+-----------+
-                                      |
-                              SSH / Ansible
-                                      |
-              +-----------------------+-----------------------+
-              |                       |                       |
-              v                       v                       v
-       +-------------+         +-------------+         +-------------+
-       | RHEL 8      |         | RHEL 8      |         | RHEL 8      |
-       | Web Server 1|         | Web Server 2|         | DB / NFS    |
-       +-------------+         +-------------+         +-------------+
-
-                              +-------------+
-                              | Ubuntu      |
-                              | Load        |
-                              | Balancer    |
-                              +-------------+
-```
-
-### Architecture Diagram
-
-```{=html}
-<!-- TODO: Add the project architecture image to the repository. -->
-```
-```{=html}
-<!-- Recommended location: images/architecture.png -->
-```
 ![Project Architecture](images/architecture.png)
 
 ### Architecture Components
@@ -149,51 +97,32 @@ Jenkins/Ansible control node, and multiple managed servers.
   -----------------------------------------------------------------------
   Component                           Role
   ----------------------------------- -----------------------------------
-  Developer PC                        Used to create and modify Ansible
+  **Developer PC**                        Used to create and modify Ansible
                                       automation code
 
-  GitHub                              Version control and central
+  **GitHub**                              Version control and central
                                       repository for the automation code
 
-  GitHub Webhook                      Sends an event to Jenkins when
+  **GitHub Webhook**                      Sends an event to Jenkins when
                                       repository changes occur
 
-  Jenkins                             Automates the CI/CD execution
+  **Jenkins**                             Automates the CI/CD execution
                                       workflow
 
-  Ansible Control Node                Executes playbooks against managed
+  **Ansible Control Node**              Executes playbooks against managed
                                       servers
 
-  Ansible Inventory                   Defines and groups the managed
+  **Ansible Inventory**                 Defines and groups the managed
                                       hosts
 
-  SSH                                 Secure communication between the
+  **SSH**                                 Secure communication between the
                                       control node and managed servers
 
-  RHEL 8 Servers                      Remote servers managed by Ansible
+  **RHEL 8 Servers**                      Remote servers managed by Ansible
 
-  Ubuntu Server                       Remote development
+  **Ubuntu Server**                      Remote development
                                       server/load-balancer environment
   -----------------------------------------------------------------------
-
-------------------------------------------------------------------------
-
-# Technology Stack
-
-  Technology   Purpose
-  ------------ -------------------------------------------
-  Linux        Server operating system
-  Ubuntu       Ansible/Jenkins control environment
-  RHEL 8       Managed server environment
-  Ansible      Configuration management and automation
-  Jenkins      CI/CD automation
-  Git          Source control
-  GitHub       Remote repository and webhook integration
-  SSH          Secure remote server access
-  YAML         Ansible playbook format
-  Bash         Command-line administration and scripting
-
-------------------------------------------------------------------------
 
 # Repository Structure
 
@@ -212,25 +141,7 @@ ansible-configuration-mgmt/
 │   └── change-timezone.yml
 │
 ├── images/
-│   ├── architecture.png
-│   ├── ssh-connection.png
-│   ├── ansible-version.png
-│   ├── ansible-ping.png
-│   ├── inventory.png
-│   ├── wireshark-installation.png
-│   ├── directory-file.png
-│   ├── timezone.png
-│   ├── github-webhook.png
-│   ├── jenkins-job.png
-│   └── jenkins-success.png
-│
-├── README.md
-└── Jenkinsfile
 ```
-
-> **Note:** The filenames above are recommended documentation names.
-> Adjust them to match the files actually present in the repository.
-
 ------------------------------------------------------------------------
 
 # Implementation
@@ -250,28 +161,15 @@ The control node is responsible for:
 -   Serving as the automation environment used by Jenkins.
 
 ### Verify Ansible Installation
-
-```{=html}
-<!-- TODO: Replace with the exact command/output used in your environment. -->
-```
+SSH to the ansible server and execeute the commands below to install ansible.
 ``` bash
+sudo apt update
 ansible --version
 ```
-
-Example:
-
-``` text
-ansible [core ...]
-python version = ...
-jinja version = ...
-```
-
 ### Screenshot
 
-```{=html}
-<!-- TODO: Add screenshot showing successful Ansible installation. -->
-```
-![Ansible Installation](images/ansible-version.png)
+![Ansible Installation](images/update.png)
+![Ansible Installation](images/installansible.png)
 
 ------------------------------------------------------------------------
 
@@ -294,25 +192,16 @@ The configured SSH key was:
 ``` text
 /home/ubuntu/.ssh/ansible_key
 ```
-
 ### Test SSH Connectivity
-
-```{=html}
-<!-- TODO: Replace the username/host with a non-sensitive example if documenting publicly. -->
-```
 ``` bash
 ssh -i /home/ubuntu/.ssh/ansible_key ubuntu@<REMOTE_SERVER_IP>
 ```
-
 Successful SSH access confirms that the control node can communicate
 with the managed host.
 
 ### Screenshot
-
-```{=html}
-<!-- TODO: Add screenshot showing successful SSH connection. -->
-```
-![SSH Connection](images/ssh-connection.png)
+![SSH Connection](images/key.png)
+![SSH Connection](images/ec2.png)
 
 ------------------------------------------------------------------------
 
@@ -334,29 +223,26 @@ development servers.
 
 ``` ini
 [webservers]
-web-server-1 ansible_host=<WEB_SERVER_1_IP>
-web-server-2 ansible_host=<WEB_SERVER_2_IP>
+web-server-1 ansible_host=<WEB_SERVER_1_IP> ansible_ssh_private_key_file=/home/ubuntu/.ssh/ansible_key
+
+web-server-2 ansible_host=<WEB_SERVER_2_IP> ansible_ssh_private_key_file=/home/ubuntu/.ssh/ansible_key
+
 
 [database]
-db-server ansible_host=<DATABASE_SERVER_IP>
+db-server ansible_host=<DATABASE_SERVER_IP> ansible_ssh_private_key_file=/home/ubuntu/.ssh/ansible_key
+
 
 [nfs]
-nfs-server ansible_host=<NFS_SERVER_IP>
+nfs-server ansible_host=<NFS_SERVER_IP> ansible_ssh_private_key_file=/home/ubuntu/.ssh/ansible_key
+
 
 [loadbalancer]
-load-balancer ansible_host=<LOAD_BALANCER_IP>
-```
+load-balancer ansible_host=<LOAD_BALANCER_IP> ansible_ssh_private_key_file=/home/ubuntu/.ssh/ansible_key
 
-> **Important:** Do not expose private infrastructure addresses or
-> credentials in a public portfolio repository unless they are
-> intentionally public and safe to disclose.
+```
 
 ### Screenshot
-
-```{=html}
-<!-- TODO: Add screenshot of your actual dev.ini inventory. -->
-```
-![Ansible Inventory](images/inventory.png)
+![Ansible Inventory](images/inv.png)
 
 ------------------------------------------------------------------------
 
@@ -367,15 +253,14 @@ Three playbooks were developed as part of the project.
   -----------------------------------------------------------------------
   Playbook                            Purpose
   ----------------------------------- -----------------------------------
-  `install-wireshark.yml`             Installs Wireshark on managed
+  `common.yml`             Installs Wireshark on managed
                                       servers
 
-  `create-directory-file.yml`         Creates a directory and file on a
+  `createfile.yml`         Creates a directory and file on a
                                       remote server
-
-  `change-timezone.yml`               Changes the timezone of managed
-                                      servers
   -----------------------------------------------------------------------
+### Screenshot
+![Ansible Inventory](images/inv2.png)
 
 These playbooks demonstrate software management, filesystem management,
 and operating-system configuration.
@@ -393,55 +278,53 @@ This eliminates the need to manually log into each server and install
 the package individually.
 
 ### Playbook
-
-```{=html}
-<!-- TODO: Replace the block below with the exact contents of your actual playbook if they differ. -->
 ```
-``` yaml
 ---
-- name: Install Wireshark
-  hosts: all
+- name: Update web, nfs
+  hosts: webservers, nfs
   become: yes
 
   tasks:
-    - name: Install Wireshark
-      ansible.builtin.package:
+    - name: Ensure Wireshark is installed at the latest version
+      yum:
         name: wireshark
-        state: present
-```
+        state: latest
 
+- name: Update load balancer servers
+  hosts: lb
+  become: yes
+
+  tasks:
+    - name: Update apt repository
+      apt:
+        update_cache: yes
+
+    - name: Ensure Wireshark is installed at the latest version
+      apt:
+        name: wireshark
+        state: latest
+```
 ### Execute
 
 ``` bash
-ansible-playbook \
-  -i inventory/dev.ini \
-  playbooks/install-wireshark.yml
+ansible-playbook -i inventory/dev.ini  playbooks/common.yml
 ```
 
 ### Validation
 
-Verify that Wireshark is installed on a managed server:
+Verify that Wireshark is was not installed and  installed on a managed server:
 
 ``` bash
-rpm -qa | grep wireshark
+wireshark --version
 ```
-
-For Debian/Ubuntu systems:
-
-``` bash
-dpkg -l | grep wireshark
-```
-
 ### Screenshot
 
-```{=html}
-<!-- TODO: Add screenshot showing successful playbook execution. -->
-```
-![Wireshark Installation](images/wireshark-installation.png)
+![Wireshark Installation](images/wireshark1.png)
+![Wireshark Installation](images/wireshark2.png)
 
 ------------------------------------------------------------------------
 
-# Playbook 2: Create Directory and File
+# Playbook 2: Create Directory and File and change timnezone on the servers
 
 ## Objective
 
@@ -452,57 +335,41 @@ This demonstrates Ansible's ability to manage filesystem resources
 remotely.
 
 ### Playbook
-
-```{=html}
-<!-- TODO: Replace with your exact playbook if the path, filename, permissions or module usage differ. -->
-```
 ``` yaml
 ---
-- name: Create directory and file
-  hosts: all
+- name: Create a new directory and file inside it
+  hosts: db
   become: yes
-
   tasks:
-
-    - name: Create directory
+    - name: Create a new directory
       ansible.builtin.file:
-        path: /tmp/example-directory
+        path: /tmp/TEST
         state: directory
         mode: '0755'
-
     - name: Create file
       ansible.builtin.file:
-        path: /tmp/example-directory/example.txt
+        path: /tmp/TEST/sample.txt
         state: touch
         mode: '0644'
-```
+    - name: Add configuration in the file
+      ansible.builtin.copy:
+        dest: /tmp/TEST/sample.txt
+        content: |
+          Application: MyApp
+          Environment: Dev
+          Managed by: Ansible
+        mode: '0644'
 
+```
 ### Execute
-
 ``` bash
-ansible-playbook \
-  -i inventory/dev.ini \
-  playbooks/create-directory-file.yml
-```
-
-### Validation
-
-``` bash
-ls -la /tmp/example-directory
-```
-
-Expected:
-
-``` text
-example.txt
+ansible-playbook -i inventory/dev.ini  playbooks/createfile.yml
 ```
 
 ### Screenshot
 
-```{=html}
-<!-- TODO: Add screenshot showing the directory and file created on the remote host. -->
-```
-![Directory and File](images/directory-file.png)
+![Directory and File](images/dir3.png)
+
 
 ------------------------------------------------------------------------
 
@@ -523,50 +390,23 @@ Africa/Nairobi
 
 The `community.general.timezone` module was used for timezone
 configuration.
-
-```{=html}
-<!-- TODO: Replace with the exact contents of your actual playbook if they differ. -->
-```
 ``` yaml
----
-- name: Configure server timezone
-  hosts: all
+- name: Configure a new timezone
+  hosts: db
   become: yes
-
   tasks:
-    - name: Set timezone to Africa/Nairobi
-      community.general.timezone:
-        name: Africa/Nairobi
+     - name: Set timezone to GMT
+       community.general.timezone:
+         name: Africa/Nairobi
 ```
 
 ### Execute
 
 ``` bash
-ansible-playbook \
-  -i inventory/dev.ini \
-  playbooks/change-timezone.yml
+ansible-playbook -i inventory/dev.ini  playbooks/createfile.yml
 ```
-
-### Validation
-
-The configured timezone can be verified with:
-
-``` bash
-timedatectl
-```
-
-Expected:
-
-``` text
-Time zone: Africa/Nairobi (EAT, +0300)
-```
-
 ### Screenshot
-
-```{=html}
-<!-- TODO: Add screenshot showing timedatectl output. -->
-```
-![Timezone Configuration](images/timezone.png)
+![Timezone Configuration](images/time.png)
 
 ------------------------------------------------------------------------
 
@@ -588,36 +428,7 @@ ssh -i /home/ubuntu/.ssh/ansible_key ubuntu@<REMOTE_SERVER_IP>
 
 ------------------------------------------------------------------------
 
-## 2. Ansible Ping Test
-
-Ansible's `ping` module was used to validate communication with the
-managed nodes.
-
-``` bash
-ansible all \
-  -i inventory/dev.ini \
-  -m ping
-```
-
-A successful response should contain:
-
-``` text
-SUCCESS => {
-    "changed": false,
-    "ping": "pong"
-}
-```
-
-### Screenshot
-
-```{=html}
-<!-- TODO: Add actual successful ping screenshot. -->
-```
-![Ansible Ping](images/ansible-ping.png)
-
-------------------------------------------------------------------------
-
-## 3. Inventory Validation
+## 2. Inventory Validation
 
 The configured hosts can be displayed using:
 
@@ -626,61 +437,47 @@ ansible all \
   -i inventory/dev.ini \
   --list-hosts
 ```
+![Timezone Configuration](images/hosts.png)
 
 This confirms that Ansible is reading the expected hosts from the
 inventory.
 
 ------------------------------------------------------------------------
 
-## 4. Playbook Syntax Validation
+## 3. Playbook Syntax Validation
 
 Before executing a playbook, syntax can be checked with:
 
 ``` bash
-ansible-playbook \
-  -i inventory/dev.ini \
-  playbooks/install-wireshark.yml \
-  --syntax-check
+ansible-playbook -i inventory/dev.ini --syntax-check playbooks/script.yml
 ```
-
-Expected:
-
-``` text
-playbook: playbooks/install-wireshark.yml
-```
+![Timezone Configuration](images/syntax.png)
 
 The same validation can be performed against the other playbooks.
 
 ------------------------------------------------------------------------
 
-## 5. Ansible Check Mode
+## 4. Ansible Check Mode
 
 Ansible check mode can be used to preview changes before applying them:
 
 ``` bash
 ansible-playbook \
   -i inventory/dev.ini \
-  playbooks/change-timezone.yml \
+  playbooks/script.yml \
   --check
 ```
+![Timezone Configuration](images/precheck.png)
 
 This provides an additional safety mechanism when testing configuration
 changes.
 
 ------------------------------------------------------------------------
 
-## 6. Idempotency Testing
+## 5. Idempotency Testing
 
 Ansible playbooks are designed to be **idempotent**, meaning repeated
 execution should not continuously make the same changes.
-
-For example:
-
-``` bash
-ansible-playbook \
-  -i inventory/dev.ini \
-  playbooks/create-directory-file.yml
-```
 
 Running the same playbook again should report fewer changes once the
 desired state already exists.
@@ -752,11 +549,7 @@ Jenkins starts configured job
 ```
 
 ### Screenshot
-
-```{=html}
-<!-- TODO: Add screenshot of the GitHub webhook configuration. -->
-```
-![GitHub Webhook](images/github-webhook.png)
+![GitHub Webhook](images/webhook.png)
 
 ------------------------------------------------------------------------
 
@@ -773,27 +566,12 @@ The Jenkins job performs the following high-level operations:
 5.  Executes the required Ansible playbook.
 6.  Reports the execution result.
 
-### Example Ansible Command Executed by Jenkins
-
-``` bash
-ansible-playbook \
-  -i inventory/dev.ini \
-  playbooks/<playbook-name>.yml
-```
-
 ### Jenkins Job
 
-```{=html}
-<!-- TODO: Add screenshot of the Jenkins job configuration. -->
-```
-![Jenkins Job](images/jenkins-job.png)
+![Jenkins Job](images/ansiblejob.png)
 
 ### Successful Build
-
-```{=html}
-<!-- TODO: Add screenshot showing a successful Jenkins build. -->
-```
-![Successful Jenkins Build](images/jenkins-success.png)
+![Successful Jenkins Build](images/ansiblejobsuccess.png)
 
 ------------------------------------------------------------------------
 
@@ -836,68 +614,6 @@ The intended CI/CD flow can be represented as:
 | Web / DB / NFS / LB   |
 +----------------------+
 ```
-
-------------------------------------------------------------------------
-
-# Security
-
-Security is an important consideration when implementing automated
-infrastructure management.
-
-## SSH Private Key
-
-The SSH private key used by Ansible must remain on the control node and
-should never be committed to GitHub.
-
-Example:
-
-``` text
-/home/ubuntu/.ssh/ansible_key
-```
-
-A public repository should never contain the private key.
-
-------------------------------------------------------------------------
-
-## Credentials
-
-Do not store the following directly in playbooks or Git:
-
--   SSH private keys
--   Passwords
--   Cloud credentials
--   API tokens
--   Jenkins credentials
--   Database passwords
--   Other secrets
-
-For production environments, secrets should be managed through
-appropriate secret-management mechanisms such as:
-
--   Jenkins Credentials
--   Ansible Vault
--   Cloud secret-management services
--   Environment-specific secure variables
-
-------------------------------------------------------------------------
-
-## Public Repository Considerations
-
-If this repository is public, private IP addresses and
-infrastructure-specific information should be replaced with
-placeholders.
-
-For example:
-
-``` text
-<WEB_SERVER_1_IP>
-<DB_SERVER_IP>
-<JENKINS_URL>
-<SSH_USER>
-```
-
-This keeps the portfolio project useful without exposing internal
-infrastructure details.
 
 ------------------------------------------------------------------------
 
@@ -974,16 +690,6 @@ Ansible Control Node
 
 The resulting server state is validated using Ansible output and
 operating-system commands such as:
-
-``` bash
-timedatectl
-```
-
-or:
-
-``` bash
-ls -la /tmp/example-directory
-```
 
 ------------------------------------------------------------------------
 
@@ -1186,25 +892,6 @@ Integrate server monitoring to track:
 
 ------------------------------------------------------------------------
 
-# Evidence and Screenshots
-
-The following screenshots are recommended as evidence of implementation.
-
-  Evidence                       Recommended File
-  ------------------------------ -------------------------------------
-  Overall architecture           `images/architecture.png`
-  Ansible installation           `images/ansible-version.png`
-  SSH connectivity               `images/ssh-connection.png`
-  Ansible ping                   `images/ansible-ping.png`
-  Inventory configuration        `images/inventory.png`
-  Wireshark playbook execution   `images/wireshark-installation.png`
-  Directory/file creation        `images/directory-file.png`
-  Timezone configuration         `images/timezone.png`
-  GitHub webhook                 `images/github-webhook.png`
-  Jenkins job                    `images/jenkins-job.png`
-  Successful Jenkins build       `images/jenkins-success.png`
-
-------------------------------------------------------------------------
 
 # Project Skills Demonstrated
 
@@ -1240,42 +927,9 @@ The implementation moves server administration away from repetitive
 manual configuration toward a repeatable, version-controlled and
 automated workflow.
 
-The core workflow is:
-
-``` text
-Developer
-    |
-    | Git Push
-    v
-GitHub
-    |
-    | Webhook
-    v
-Jenkins
-    |
-    | Execute
-    v
-Ansible Control Node
-    |
-    | SSH
-    v
-Managed Servers
-    |
-    v
-Automated Configuration
-```
-
 The project establishes a foundation that can be expanded into a more
 advanced infrastructure automation platform by introducing Ansible
 roles, environment separation, secrets management, automated testing,
 monitoring and a fully declarative Jenkins pipeline.
 
 ------------------------------------------------------------------------
-
-## Author
-
-**DevOps / Cloud Engineering Portfolio Project**
-
-> This project was developed to demonstrate practical implementation of
-> configuration management, Infrastructure as Code and CI/CD automation
-> using Ansible, GitHub and Jenkins.
