@@ -21,4 +21,11 @@
           Environment: Dev
           Managed by: Ansible
         mode: '0644'
+- name: Configure a new timezone
+  hosts: db
+  become: yes
+  tasks:
+     - name: Set timezone to GMT
+       community.general.timezone:
+         name: Africa/Nairobi
       
