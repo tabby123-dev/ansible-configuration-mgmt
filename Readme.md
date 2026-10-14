@@ -1,6 +1,6 @@
 # Ansible Configuration Management with Jenkins and GitHub
 
-> **DevOps Portfolio Project, Iaac,Configuration
+> **DevOps Portfolio Project,Configuration
 > Management & CI/CD**
 
 ## Table of Contents
