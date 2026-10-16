@@ -1,3 +1,37 @@
-#SPDX-License-Identifier: MIT-0
+
+# SPDX-License-Identifier: MIT-0
 ---
-# tasks file for webserver
+- name: Configure Apache web server
+  hosts: webservers
+  become: yes
+
+  tasks:
+    - name: Install Apache and Git
+      ansible.builtin.apt:
+        name:
+          - apache2
+          - git
+        state: present
+        update_cache: yes
+
+    - name: Clone tooling solution repository
+      ansible.builtin.git:
+        repo: 'https://github.com/tabby123-dev/tooling-solution.git'
+        dest: /opt/tooling-solution
+        version: main
+
+    - name: Copy website files to Apache document root
+      ansible.builtin.copy:
+        src: /opt/tooling-solution/html/
+        dest: /var/www/html/
+        remote_src: yes
+        owner: www-data
+        group: www-data
+        mode: preserve
+
+    - name: Start and enable Apache service
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: yes
+

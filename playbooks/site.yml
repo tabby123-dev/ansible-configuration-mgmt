@@ -1,2 +1,6 @@
 ---
-- import_playbook: ../static-assignments/common-del.yml
+- import_playbook: ../static-assignments/common.yml
+
+- hosts: webservers
+- import_playbook: ../static-assignments/uat-webservers.yml
+
