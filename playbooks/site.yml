@@ -1,3 +1,2 @@
 ---
-- hosts: all
 - import_playbooks: ../static-assignments/common-del.yml
