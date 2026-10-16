@@ -1,23 +1,9 @@
 ---
 - name: Update web, nfs 
-  hosts: webservers, nfs
+  hosts: webservers
   become: yes
 
   tasks:
-    - name: Ensure Wireshark is installed at the latest version
-      yum:
-        name: wireshark
-        state: latest
-
-- name: Update load balancer servers
-  hosts: lb
-  become: yes
-
-  tasks:
-    - name: Update apt repository
-      apt:
-        update_cache: yes
-
     - name: Ensure Wireshark is installed at the latest version
       apt:
         name: wireshark
