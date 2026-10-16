@@ -1,0 +1,10 @@
+---
+- name: update web
+  hosts: webservers
+  become: yes
+  remote_user: ubuntu
+  tasks:
+    - name: delete Wireshark
+      apt:
+        name: wireshark
+        state: absent
